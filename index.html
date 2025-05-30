@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>V12 js · Code Editor · Output · Flowchart</title>
+
+  <!-- Cairo Play font (variable weight) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo+Play:wght@600&display=swap" rel="stylesheet" />
+
+  <!-- CodeMirror CSS & JS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/esprima/dist/esprima.min.js"></script>
+
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <nav id="navbar">
+    <div class="nav-left cairo-play-v12">V12 js</div>
+    <div class="nav-right">
+      <a href="#" id="downloadFlowchart" class="nav-link" tabindex="0">Download Flowchart</a>
+      <a href="https://github.com/" target="_blank" rel="noopener" class="nav-link" tabindex="0">Github</a>
+    </div>
+  </nav>
+
+  <div id="container">
+    <section id="editorPane">
+      <textarea id="code">// type JS here\nconsole.log("Hello world!")</textarea>
+    </section>
+
+    <section id="outputPane">
+      <h3>Output</h3>
+      <pre id="outputContent"></pre>
+    </section>
+
+    <section id="flowchartPane">
+      <h3>Flowchart (coming soon)</h3>
+      <div id="flowchartContent">Flowchart will be generated here.</div>
+    </section>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

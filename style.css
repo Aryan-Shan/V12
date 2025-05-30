@@ -1,0 +1,147 @@
+/* Reset & basics */
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Cairo Play font class with weight 600 */
+.cairo-play-v12 {
+  font-family: 'Cairo Play', sans-serif;
+  font-weight: 600;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-variation-settings: "slnt" 0;
+}
+
+/* Navbar styles */
+#navbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 50px;
+  background: #222;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 16px;
+  box-sizing: border-box;
+  z-index: 1000;
+  user-select: none;
+  font-size: 1.25rem;
+  letter-spacing: 0.05em;
+}
+
+/* Left side V12 js */
+.nav-left {
+  user-select: text;
+}
+
+/* Right side nav links container */
+.nav-right {
+  display: flex;
+  gap: 12px;
+}
+
+/* Nav links minimalist boxy style */
+.nav-link {
+  color: white;
+  background: transparent;
+  padding: 6px 12px;
+  border: 1px solid white;
+  border-radius: 2px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  line-height: 1;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* On hover & focus: invert colors */
+.nav-link:hover,
+.nav-link:focus {
+  background: white;
+  color: #222;
+  outline: none;
+}
+
+/* Container grid below navbar */
+#container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 2fr 1fr;
+  gap: 6px;
+  height: calc(100vh - 50px);
+  margin-top: 50px; /* push below navbar */
+  padding: 6px;
+  box-sizing: border-box;
+}
+
+/* Panes styling */
+#editorPane {
+  grid-column: 1;
+  grid-row: 1 / 2;
+  border: 1px solid #ccc;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#outputPane {
+  grid-column: 2;
+  grid-row: 1 / 2;
+  border: 1px solid #ccc;
+  background: #1a1a1a;
+  color: white;
+  padding: 10px;
+  overflow: auto;
+  box-sizing: border-box;
+}
+
+#flowchartPane {
+  grid-column: 1 / 3;
+  grid-row: 2;
+  border: 1px solid #ccc;
+  background: #f9f9f9;
+  padding: 10px;
+  overflow: auto;
+  box-sizing: border-box;
+}
+
+/* Headings */
+h3 {
+  margin: 0 0 8px 0;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+/* CodeMirror editor fills editorPane */
+.CodeMirror {
+  flex-grow: 1;
+  font-family: monospace;
+  font-size: 15px;
+  background: rgb(255, 255, 255);
+  overflow: hidden;
+}
+
+/* Scroll inside CodeMirror */
+.CodeMirror-scroll {
+  height: 100%;
+  overflow: auto !important;
+}
+
+/* Error message styling */
+#errorMsg {
+  color: red;
+  white-space: pre-wrap;
+  font-weight: bold;
+}
+
+/* Highlight error lines in editor */
+.cm-errorLine {
+  background-color: #fffa8c !important; /* bright yellow */
+}
