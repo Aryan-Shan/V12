@@ -104,9 +104,120 @@ function runCode(code) {
 }
 
 /*********** Stub for flowchart generation ***********/
-function generateFlowchart() {
-  flowchartDiv.textContent = 'Flowchart will be generated here.';
+function generateFlowchart(code) {
+  try {
+    const ast = esprima.parseScript(code, { range: true });
+    let flowchart = 'flowchart LR\n'; // Mermaid flowchart (Left to Right)
+    let nodeId = 0;
+    const edges = [];
+
+    function getNodeId() {
+      return `node${nodeId++}`;
+    }
+
+    function createNode(text) {
+      const id = getNodeId();
+      flowchart += `${id}["${text.replace(/"/g, "'")}"]\n`;
+      return id;
+    }
+
+    function traverse(node, parentId = null) {
+      if (!node) return null;
+
+      let currentId = null;
+
+      switch (node.type) {
+        case 'Program':
+          let lastNode = null;
+          for (const stmt of node.body) {
+            const nextId = traverse(stmt, lastNode);
+            if (lastNode && nextId) edges.push(`${lastNode} --> ${nextId}`);
+            lastNode = nextId;
+          }
+          return lastNode;
+
+        case 'FunctionDeclaration':
+          currentId = createNode(`Function: ${node.id.name}`);
+          if (parentId) edges.push(`${parentId} --> ${currentId}`);
+          traverse(node.body, currentId);
+          return currentId;
+
+        case 'BlockStatement':
+          let prevBlock = parentId;
+          for (const stmt of node.body) {
+            const id = traverse(stmt, prevBlock);
+            if (prevBlock && id) edges.push(`${prevBlock} --> ${id}`);
+            prevBlock = id;
+          }
+          return prevBlock;
+
+        case 'VariableDeclaration':
+          currentId = createNode(
+            node.declarations
+              .map(d => `${d.id.name} = ${d.init ? code.slice(...d.init.range) : 'undefined'}`)
+              .join(', ')
+          );
+          if (parentId) edges.push(`${parentId} --> ${currentId}`);
+          return currentId;
+
+        case 'IfStatement':
+          currentId = createNode(`if (${code.slice(...node.test.range)})`);
+          if (parentId) edges.push(`${parentId} --> ${currentId}`);
+          const consequent = traverse(node.consequent, currentId);
+          if (consequent) edges.push(`${currentId} -->|true| ${consequent}`);
+          if (node.alternate) {
+            const alternate = traverse(node.alternate, currentId);
+            if (alternate) edges.push(`${currentId} -->|false| ${alternate}`);
+          }
+          return currentId;
+
+        case 'WhileStatement':
+          currentId = createNode(`while (${code.slice(...node.test.range)})`);
+          if (parentId) edges.push(`${parentId} --> ${currentId}`);
+          const bodyId = traverse(node.body, currentId);
+          if (bodyId) edges.push(`${bodyId} --> ${currentId}`); // loop back
+          return currentId;
+
+        case 'ExpressionStatement':
+          currentId = createNode(code.slice(...node.range));
+          if (parentId) edges.push(`${parentId} --> ${currentId}`);
+          return currentId;
+
+        case 'ReturnStatement':
+          currentId = createNode(
+            `return ${node.argument ? code.slice(...node.argument.range) : ''}`
+          );
+          if (parentId) edges.push(`${parentId} --> ${currentId}`);
+          return currentId;
+
+        default:
+          return null;
+      }
+    }
+
+    traverse(ast);
+
+    // Join edges
+    flowchart += edges.join('\n');
+
+    // Inject Mermaid chart into the div
+    flowchartDiv.innerHTML = `<div class="mermaid">${flowchart}</div>`;
+if (window.mermaid) {
+  setTimeout(() => {
+    const mermaidDiv = flowchartDiv.querySelector('.mermaid');
+    if (mermaidDiv) {
+      mermaid.init(undefined, mermaidDiv);
+    }
+  }, 0);
 }
+
+    
+  } catch (err) {
+    console.error("Flowchart generation error:", err.message);
+    flowchartDiv.innerHTML = `<span id="errorMsg">Flowchart Error: ${err.message}</span>`;
+  }
+}
+
 
 /*********** Main pipeline with debounce ***********/
 editor.on('change', debounce(handleChange, 200));
