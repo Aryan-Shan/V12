@@ -1,27 +1,28 @@
 /*********** CodeMirror setup ***********/
-const editor = CodeMirror.fromTextArea(document.getElementById('code'), {
+const editor = CodeMirror.fromTextArea(document.getElementById("code"), {
   mode: "javascript",
   lineNumbers: true,
   indentUnit: 2,
-  autofocus: true
+  autofocus: true,
 });
 editor.setOption("viewportMargin", Infinity); // allow scrolling beyond visible lines
 
 /*********** DOM refs ***********/
-const outputContent = document.getElementById('outputContent');
-const flowchartDiv = document.getElementById('flowchartContent');
+const outputContent = document.getElementById("outputContent");
+const flowchartDiv = document.getElementById("flowchartContent");
+const flowchartWrapper = document.getElementById("flowchart-wrapper"); // assumes you wrap it
 
 /*********** Error highlights storage ***********/
 let errorMarks = [];
 
 /*********** Highlight error lines in CodeMirror ***********/
 function highlightErrorLines(lines) {
-  lines.forEach(line => {
+  lines.forEach((line) => {
     if (line >= 0 && line < editor.lineCount()) {
       const mark = editor.markText(
         { line: line, ch: 0 },
         { line: line, ch: editor.getLine(line).length },
-        { className: 'cm-errorLine' }
+        { className: "cm-errorLine" }
       );
       errorMarks.push(mark);
     }
@@ -30,31 +31,25 @@ function highlightErrorLines(lines) {
 
 /*********** Clear previous error highlights ***********/
 function clearErrorMarks() {
-  errorMarks.forEach(mark => mark.clear());
+  errorMarks.forEach((mark) => mark.clear());
   errorMarks = [];
 }
 
 /*********** Parse error line numbers from error stack or message ***********/
 function parseLineNumbersFromError(err) {
   let lines = [];
-
   if (err.stack) {
-    // Match all occurrences like ":<line>:<col>" from stack trace
     const matches = [...err.stack.matchAll(/:(\d+):\d+\)?/g)];
     if (matches.length) {
-      matches.forEach(m => {
+      matches.forEach((m) => {
         const lineNum = parseInt(m[1], 10);
         if (!isNaN(lineNum)) {
-          lines.push(lineNum - 1); // Convert 1-based to 0-based
+          lines.push(lineNum - 1);
         }
       });
-      // Remove duplicates
-      lines = [...new Set(lines)];
-      return lines;
+      return [...new Set(lines)];
     }
   }
-
-  // Fallback: check message for line number (e.g. SyntaxError)
   if (err.message) {
     const match = err.message.match(/\((\d+):\d+\)/);
     if (match) {
@@ -65,49 +60,37 @@ function parseLineNumbersFromError(err) {
       }
     }
   }
-
   return [];
 }
 
 /*********** Run user JS safely and capture output/errors ***********/
 function runCode(code) {
   try {
-    outputContent.textContent = ''; // Clear previous output
+    outputContent.textContent = "";
     clearErrorMarks();
-
     const logs = [];
     const originalLog = console.log;
     console.log = (...args) => {
-      logs.push(args.join(' '));
+      logs.push(args.join(" "));
       originalLog.apply(console, args);
     };
-
-    // Execute user code
     new Function(code)();
-
     console.log = originalLog;
-
-    outputContent.textContent = logs.length ? logs.join('\n') : '(no output)';
+    outputContent.textContent = logs.length ? logs.join("\n") : "(no output)";
   } catch (err) {
-    console.log = console.log; // Reset console.log safely
+    console.log = console.log;
     clearErrorMarks();
-
-    // Show error in red
     outputContent.innerHTML = `<span id="errorMsg">Error: ${err.message}</span>`;
-
-    // Highlight error lines
     const errorLines = parseLineNumbersFromError(err);
-    if (errorLines.length > 0) {
-      highlightErrorLines(errorLines);
-    }
+    if (errorLines.length > 0) highlightErrorLines(errorLines);
   }
 }
 
-/*********** Stub for flowchart generation ***********/
+/*********** Flowchart generation ***********/
 function generateFlowchart(code) {
   try {
     const ast = esprima.parseScript(code, { range: true });
-    let flowchart = 'flowchart LR\n'; // Mermaid flowchart (Left to Right)
+    let flowchart = "flowchart LR\n";
     let nodeId = 0;
     const edges = [];
 
@@ -123,104 +106,142 @@ function generateFlowchart(code) {
 
     function traverse(node, parentId = null) {
       if (!node) return null;
-
       let currentId = null;
 
       switch (node.type) {
-        case 'Program':
-          let lastNode = null;
-          for (const stmt of node.body) {
-            const nextId = traverse(stmt, lastNode);
-            if (lastNode && nextId) edges.push(`${lastNode} --> ${nextId}`);
-            lastNode = nextId;
-          }
-          return lastNode;
+  case "Program": {
+    let lastNode = null;
+    for (const stmt of node.body) {
+      lastNode = traverse(stmt, lastNode); // only child adds edge
+    }
+    return lastNode;
+  }
 
-        case 'FunctionDeclaration':
-          currentId = createNode(`Function: ${node.id.name}`);
-          if (parentId) edges.push(`${parentId} --> ${currentId}`);
-          traverse(node.body, currentId);
-          return currentId;
+  case "FunctionDeclaration": {
+    currentId = createNode(`Function: ${node.id.name}`);
+    if (parentId) edges.push(`${parentId} --> ${currentId}`);
+    traverse(node.body, currentId);
+    return currentId;
+  }
 
-        case 'BlockStatement':
-          let prevBlock = parentId;
-          for (const stmt of node.body) {
-            const id = traverse(stmt, prevBlock);
-            if (prevBlock && id) edges.push(`${prevBlock} --> ${id}`);
-            prevBlock = id;
-          }
-          return prevBlock;
+  case "BlockStatement": {
+    let prev = parentId;
+    for (const stmt of node.body) {
+      prev = traverse(stmt, prev); // child adds edge, no double push
+    }
+    return prev;
+  }
 
-        case 'VariableDeclaration':
-          currentId = createNode(
-            node.declarations
-              .map(d => `${d.id.name} = ${d.init ? code.slice(...d.init.range) : 'undefined'}`)
-              .join(', ')
-          );
-          if (parentId) edges.push(`${parentId} --> ${currentId}`);
-          return currentId;
+  case "VariableDeclaration": {
+    currentId = createNode(
+      node.declarations
+        .map((d) => `${d.id.name} = ${d.init ? code.slice(...d.init.range) : "undefined"}`)
+        .join(", ")
+    );
+    if (parentId) edges.push(`${parentId} --> ${currentId}`);
+    return currentId;
+  }
 
-        case 'IfStatement':
-          currentId = createNode(`if (${code.slice(...node.test.range)})`);
-          if (parentId) edges.push(`${parentId} --> ${currentId}`);
-          const consequent = traverse(node.consequent, currentId);
-          if (consequent) edges.push(`${currentId} -->|true| ${consequent}`);
-          if (node.alternate) {
-            const alternate = traverse(node.alternate, currentId);
-            if (alternate) edges.push(`${currentId} -->|false| ${alternate}`);
-          }
-          return currentId;
+  case "IfStatement": {
+    currentId = createNode(`if (${code.slice(...node.test.range)})`);
+    if (parentId) edges.push(`${parentId} --> ${currentId}`);
 
-        case 'WhileStatement':
-          currentId = createNode(`while (${code.slice(...node.test.range)})`);
-          if (parentId) edges.push(`${parentId} --> ${currentId}`);
-          const bodyId = traverse(node.body, currentId);
-          if (bodyId) edges.push(`${bodyId} --> ${currentId}`); // loop back
-          return currentId;
+    const consequentId = traverse(node.consequent, currentId);
+    if (consequentId) edges.push(`${currentId} -->|true| ${consequentId}`);
 
-        case 'ExpressionStatement':
-          currentId = createNode(code.slice(...node.range));
-          if (parentId) edges.push(`${parentId} --> ${currentId}`);
-          return currentId;
+    if (node.alternate) {
+      const alternateId = traverse(node.alternate, currentId);
+      if (alternateId) edges.push(`${currentId} -->|false| ${alternateId}`);
+    }
 
-        case 'ReturnStatement':
-          currentId = createNode(
-            `return ${node.argument ? code.slice(...node.argument.range) : ''}`
-          );
-          if (parentId) edges.push(`${parentId} --> ${currentId}`);
-          return currentId;
+    return currentId;
+  }
 
-        default:
-          return null;
-      }
+  case "WhileStatement": {
+    currentId = createNode(`while (${code.slice(...node.test.range)})`);
+    if (parentId) edges.push(`${parentId} --> ${currentId}`);
+
+    const bodyId = traverse(node.body, currentId);
+    if (bodyId) edges.push(`${bodyId} --> ${currentId}`); // loop back
+
+    return currentId;
+  }
+
+  case "ExpressionStatement": {
+    currentId = createNode(code.slice(...node.range));
+    if (parentId) edges.push(`${parentId} --> ${currentId}`);
+    return currentId;
+  }
+
+  case "ReturnStatement": {
+    currentId = createNode(
+      `return ${node.argument ? code.slice(...node.argument.range) : ""}`
+    );
+    if (parentId) edges.push(`${parentId} --> ${currentId}`);
+    return currentId;
+  }
+
+  default:
+    return null;
+}
+
     }
 
     traverse(ast);
 
-    // Join edges
-    flowchart += edges.join('\n');
+    flowchart += [...new Set(edges)].join("\n");
 
-    // Inject Mermaid chart into the div
     flowchartDiv.innerHTML = `<div class="mermaid">${flowchart}</div>`;
-if (window.mermaid) {
-  setTimeout(() => {
-    const mermaidDiv = flowchartDiv.querySelector('.mermaid');
-    if (mermaidDiv) {
-      mermaid.init(undefined, mermaidDiv);
+    if (window.mermaid) {
+      setTimeout(() => {
+        const mermaidDiv = flowchartDiv.querySelector(".mermaid");
+        if (mermaidDiv) {
+          mermaid.init(undefined, mermaidDiv);
+        }
+      }, 0);
     }
-  }, 0);
-}
-
-    
   } catch (err) {
     console.error("Flowchart generation error:", err.message);
     flowchartDiv.innerHTML = `<span id="errorMsg">Flowchart Error: ${err.message}</span>`;
   }
 }
 
+/*********** Zoom & pan flowchart ***********/
+let scale = 1;
+let x = 0, y = 0;
+let isDragging = false;
+let startX, startY;
+
+flowchartWrapper.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const delta = -e.deltaY * 0.001;
+  scale += delta;
+  scale = Math.min(Math.max(0.1, scale), 3);
+  updateTransform();
+});
+
+flowchartWrapper.addEventListener('mousedown', (e) => {
+  isDragging = true;
+  startX = e.clientX - x;
+  startY = e.clientY - y;
+});
+
+flowchartWrapper.addEventListener('mousemove', (e) => {
+  if (!isDragging) return;
+  x = e.clientX - startX;
+  y = e.clientY - startY;
+  updateTransform();
+});
+
+flowchartWrapper.addEventListener('mouseup', () => isDragging = false);
+flowchartWrapper.addEventListener('mouseleave', () => isDragging = false);
+
+function updateTransform() {
+  flowchartDiv.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+}
 
 /*********** Main pipeline with debounce ***********/
-editor.on('change', debounce(handleChange, 200));
+editor.on("change", debounce(handleChange, 200));
 
 function handleChange() {
   const code = editor.getValue();
