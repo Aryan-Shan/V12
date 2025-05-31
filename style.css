@@ -48,8 +48,8 @@ html, body {
   color: white;
   background: transparent;
   padding: 6px 12px;
-  border: 1px solid white;
-  border-radius: 2px;
+  border: 2px solid white;
+  border-radius: 5px;
   text-decoration: none;
   font-size: 0.9rem;
   line-height: 1;
@@ -110,7 +110,6 @@ html, body {
   padding: 10px;
   overflow: auto;
   box-sizing: border-box;
-  height:fit-content;
 }
 
 /* Headings */
@@ -152,7 +151,7 @@ h3 {
   height: 100%;
   overflow: hidden;
   position: relative;
-  background: #fff;
+  background: #ffffff;
   border: 1px solid #ccc;
   cursor: grab;
 }
