@@ -260,3 +260,21 @@ function debounce(fn, ms) {
 
 // Initial run on page load
 handleChange();
+
+document.getElementById("downloadFlowchart").addEventListener("click", () => {
+  const flowchartEl = document.getElementById("flowchartContent");
+
+  // Reset transform temporarily to capture correctly
+  const originalTransform = flowchartEl.style.transform;
+  flowchartEl.style.transform = "none";
+
+  html2canvas(flowchartEl, { backgroundColor: "#ffffff" }).then(canvas => {
+    // Restore original transform
+    flowchartEl.style.transform = originalTransform;
+
+    const link = document.createElement("a");
+    link.download = "flowchart.jpg";
+    link.href = canvas.toDataURL("image/jpeg", 1.0);
+    link.click();
+  });
+});
