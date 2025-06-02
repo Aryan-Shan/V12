@@ -12,6 +12,7 @@ html, body {
   font-optical-sizing: auto;
   font-style: normal;
   font-variation-settings: "slnt" 0;
+  font-size: 2em;
 }
 
 /* Navbar styles */
@@ -151,7 +152,7 @@ h3 {
   height: 100%;
   overflow: hidden;
   position: relative;
-  background: rgba(201, 94, 94, 0.2); /* frosty white */
+  background: rgba(219, 211, 60, 0.2); /* frosty white */
   border: 1px solid rgba(255, 255, 255, 0.3);
   cursor: grab;
 
