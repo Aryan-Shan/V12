@@ -171,3 +171,54 @@ h3 {
   transform-origin: 0 0;
   transition: transform 0.1s ease-out;
 }
+
+/* Dark theme styles */
+body.dark {
+  background: #181818;
+  color: #e0e0e0;
+}
+
+body.dark #navbar {
+  background: #181818;
+  color: #e0e0e0;
+}
+
+body.dark .nav-link {
+  color: #e0e0e0;
+  border-color: #e0e0e0;
+  background: transparent;
+}
+
+body.dark .nav-link:hover,
+body.dark .nav-link:focus {
+  background: #e0e0e0;
+  color: #181818;
+}
+
+body.dark #outputPane {
+  background: #23272e;
+  color: #e0e0e0;
+}
+
+body.dark #flowchartPane {
+  background: #23272e;
+  color: #e0e0e0;
+}
+
+body.dark #editorPane {
+  background: #23272e;
+}
+
+body.dark .CodeMirror {
+  background: #23272e;
+  color: #e0e0e0;
+}
+
+body.dark .cm-errorLine {
+  background-color: #fffa8c !important;
+}
+
+body.dark #flowchart-wrapper {
+  background: rgba(60, 60, 60, 0.2);
+  border-color: rgba(255,255,255,0.1);
+}
