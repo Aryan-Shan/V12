@@ -286,9 +286,7 @@ const savedTheme = localStorage.getItem("theme");
 
 function setTheme(dark) {
   document.body.classList.toggle("dark", dark);
-  themeToggle.textContent = dark ? "☀️" : "🌙";
   localStorage.setItem("theme", dark ? "dark" : "light");
-  // CodeMirror theme (optional, for better dark mode)
   editor.setOption("theme", dark ? "base16-dark" : "default");
 }
 
