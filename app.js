@@ -278,3 +278,22 @@ document.getElementById("downloadFlowchart").addEventListener("click", () => {
     link.click();
   });
 });
+
+/*********** Theme toggle ***********/
+const themeToggle = document.getElementById("themeToggle");
+const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+const savedTheme = localStorage.getItem("theme");
+
+function setTheme(dark) {
+  document.body.classList.toggle("dark", dark);
+  localStorage.setItem("theme", dark ? "dark" : "light");
+  editor.setOption("theme", dark ? "base16-dark" : "default");
+}
+
+// Load theme on page load
+setTheme(savedTheme === "dark" || (savedTheme === null && prefersDark));
+
+// Toggle on button click
+themeToggle.addEventListener("click", () => {
+  setTheme(!document.body.classList.contains("dark"));
+});

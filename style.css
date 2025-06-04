@@ -171,3 +171,122 @@ h3 {
   transform-origin: 0 0;
   transition: transform 0.1s ease-out;
 }
+
+/* Dark theme styles */
+body.dark {
+  background: #181818;
+  color: #e0e0e0;
+}
+
+body.dark #navbar {
+  background: #181818;
+  color: #e0e0e0;
+}
+
+body.dark .nav-link {
+  color: #e0e0e0;
+  border-color: #e0e0e0;
+  background: transparent;
+}
+
+body.dark .nav-link:hover,
+body.dark .nav-link:focus {
+  background: #e0e0e0;
+  color: #181818;
+}
+
+body.dark #outputPane {
+  background: #23272e;
+  color: #e0e0e0;
+}
+
+body.dark #flowchartPane {
+  background: #23272e;
+  color: #e0e0e0;
+}
+
+body.dark #editorPane {
+  background: #23272e;
+}
+
+body.dark .CodeMirror {
+  background: #23272e;
+  color: #e0e0e0;
+}
+
+body.dark .cm-errorLine {
+  background-color: #fffa8c !important;
+}
+
+body.dark #flowchart-wrapper {
+  background: rgba(60, 60, 60, 0.2);
+  border-color: rgba(255,255,255,0.1);
+}
+
+/* Theme toggle slider styles */
+.theme-toggle-slider {
+  position: relative;
+  width: 52px;
+  height: 28px;
+  background: #444;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 0 10px;
+  transition: background 0.2s;
+}
+
+.theme-toggle-slider .slider {
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  width: 22px;
+  height: 22px;
+  background: #fff;
+  border-radius: 50%;
+  transition: left 0.2s, background 0.2s;
+  z-index: 2;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
+
+.theme-toggle-slider .icon {
+  position: absolute;
+  font-size: 1.1em;
+  z-index: 1;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.theme-toggle-slider .icon.sun {
+  left: 7px;
+  color: #f7d51d;
+  opacity: 1;
+}
+
+.theme-toggle-slider .icon.moon {
+  right: 7px;
+  color: #4a90e2;
+  opacity: 0.7;
+}
+
+body.dark .theme-toggle-slider {
+  background: #222;
+}
+
+body.dark .theme-toggle-slider .slider {
+  left: 27px;
+  background: #333;
+}
+
+body.dark .theme-toggle-slider .icon.sun {
+  opacity: 0.5;
+}
+
+body.dark .theme-toggle-slider .icon.moon {
+  opacity: 1;
+}
