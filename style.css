@@ -290,3 +290,52 @@ body.dark .theme-toggle-slider .icon.sun {
 body.dark .theme-toggle-slider .icon.moon {
   opacity: 1;
 }
+
+/* Lessons section styles */
+#lessonsSection {
+  max-width: 700px;
+  margin: 60px auto 0 auto;
+  background: #fff;
+  color: #222;
+  border-radius: 10px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+  padding: 32px 24px;
+}
+
+body.dark #lessonsSection {
+  background: #23272e;
+  color: #e0e0e0;
+}
+
+#lessonsList {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 1em;
+}
+
+.lesson-btn {
+  padding: 8px 18px;
+  border-radius: 5px;
+  border: 2px solid #444;
+  background: #f7f7f7;
+  color: #222;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.lesson-btn:hover,
+.lesson-btn:focus {
+  background: #222;
+  color: #fff;
+}
+body.dark .lesson-btn {
+  background: #23272e;
+  color: #e0e0e0;
+  border-color: #e0e0e0;
+}
+body.dark .lesson-btn:hover,
+body.dark .lesson-btn:focus {
+  background: #e0e0e0;
+  color: #23272e;
+}

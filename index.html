@@ -30,6 +30,7 @@
         <span class="icon moon">🌙</span>
       </button>
       <a href="#" id="downloadFlowchart" class="nav-link" tabindex="0">Download Flowchart</a>
+      <a href="#" id="lessonsLink" class="nav-link" tabindex="0">Lessons</a>
       <a href="https://github.com/Aryan-Shan/V12" target="_blank" rel="noopener" class="nav-link" tabindex="0">Github</a>
     </div>
   </nav>
@@ -49,6 +50,18 @@
       <div id="flowchartContent"></div></div>
     </section>
   </div>
+
+  <div id="lessonsSection" style="display:none;">
+  <h2>JavaScript Lessons</h2>
+  <div id="lessonsList">
+    <button class="lesson-btn" data-lesson="variables">Variables</button>
+    <button class="lesson-btn" data-lesson="loops">Loops</button>
+    <button class="lesson-btn" data-lesson="functions">Functions</button>
+    <button class="lesson-btn" data-lesson="conditionals">Conditionals</button>
+  </div>
+  <div id="lessonContent" style="margin-top:1em;"></div>
+  <button id="backToEditor" class="nav-link" style="margin-top:2em;">Back to Editor</button>
+</div>
 
   <script src="app.js"></script>
   <script type="module">
