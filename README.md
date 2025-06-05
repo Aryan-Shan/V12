@@ -17,7 +17,7 @@
 - **Frontend:** HTML, CSS, JavaScript
 - **Visualization:** D3.js / Flowchart.js / Mermaid.js 
 - **Editor Engine:** CodeMirror / Ace Editor 
-- **Backend (optional):** Node.js / Flask *(later for advanced features)*
+
 
 ## 🚀 Getting Started
 
