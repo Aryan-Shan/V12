@@ -15,9 +15,9 @@
 ## 🖥️ Tech Stack
 
 - **Frontend:** HTML, CSS, JavaScript
-- **Visualization:** D3.js / Flowchart.js / Mermaid.js *(whichever you finalize)*
-- **Editor Engine:** CodeMirror / Ace Editor *(based on your implementation)*
-- **Backend (optional):** Node.js / Flask *(if used later for advanced features)*
+- **Visualization:** D3.js / Flowchart.js / Mermaid.js 
+- **Editor Engine:** CodeMirror / Ace Editor 
+- **Backend (optional):** Node.js / Flask *(later for advanced features)*
 
 ## 🚀 Getting Started
 
