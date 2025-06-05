@@ -109,82 +109,73 @@ function generateFlowchart(code) {
       let currentId = null;
 
       switch (node.type) {
-  case "Program": {
-    let lastNode = null;
-    for (const stmt of node.body) {
-      lastNode = traverse(stmt, lastNode); // only child adds edge
-    }
-    return lastNode;
-  }
+        case "Program": {
+          let lastNode = null;
+          for (const stmt of node.body) {
+            lastNode = traverse(stmt, lastNode);
+          }
+          return lastNode;
+        }
+        case "FunctionDeclaration": {
+          currentId = createNode(`Function: ${node.id.name}`);
+          if (parentId) edges.push(`${parentId} --> ${currentId}`);
+          traverse(node.body, currentId);
+          return currentId;
+        }
+        case "BlockStatement": {
+          let prev = parentId;
+          for (const stmt of node.body) {
+            prev = traverse(stmt, prev);
+          }
+          return prev;
+        }
+        case "VariableDeclaration": {
+          currentId = createNode(
+            node.declarations
+              .map((d) => `${d.id.name} = ${d.init ? code.slice(...d.init.range) : "undefined"}`)
+              .join(", ")
+          );
+          if (parentId) edges.push(`${parentId} --> ${currentId}`);
+          return currentId;
+        }
+        case "IfStatement": {
+          currentId = createNode(`if (${code.slice(...node.test.range)})`);
+          if (parentId) edges.push(`${parentId} --> ${currentId}`);
 
-  case "FunctionDeclaration": {
-    currentId = createNode(`Function: ${node.id.name}`);
-    if (parentId) edges.push(`${parentId} --> ${currentId}`);
-    traverse(node.body, currentId);
-    return currentId;
-  }
+          const consequentId = traverse(node.consequent, currentId);
+          if (consequentId) edges.push(`${currentId} -->|true| ${consequentId}`);
 
-  case "BlockStatement": {
-    let prev = parentId;
-    for (const stmt of node.body) {
-      prev = traverse(stmt, prev); // child adds edge, no double push
-    }
-    return prev;
-  }
+          if (node.alternate) {
+            const alternateId = traverse(node.alternate, currentId);
+            if (alternateId) edges.push(`${currentId} -->|false| ${alternateId}`);
+          }
 
-  case "VariableDeclaration": {
-    currentId = createNode(
-      node.declarations
-        .map((d) => `${d.id.name} = ${d.init ? code.slice(...d.init.range) : "undefined"}`)
-        .join(", ")
-    );
-    if (parentId) edges.push(`${parentId} --> ${currentId}`);
-    return currentId;
-  }
+          return currentId;
+        }
+        case "WhileStatement": {
+          currentId = createNode(`while (${code.slice(...node.test.range)})`);
+          if (parentId) edges.push(`${parentId} --> ${currentId}`);
 
-  case "IfStatement": {
-    currentId = createNode(`if (${code.slice(...node.test.range)})`);
-    if (parentId) edges.push(`${parentId} --> ${currentId}`);
+          const bodyId = traverse(node.body, currentId);
+          if (bodyId) edges.push(`${bodyId} --> ${currentId}`);
 
-    const consequentId = traverse(node.consequent, currentId);
-    if (consequentId) edges.push(`${currentId} -->|true| ${consequentId}`);
-
-    if (node.alternate) {
-      const alternateId = traverse(node.alternate, currentId);
-      if (alternateId) edges.push(`${currentId} -->|false| ${alternateId}`);
-    }
-
-    return currentId;
-  }
-
-  case "WhileStatement": {
-    currentId = createNode(`while (${code.slice(...node.test.range)})`);
-    if (parentId) edges.push(`${parentId} --> ${currentId}`);
-
-    const bodyId = traverse(node.body, currentId);
-    if (bodyId) edges.push(`${bodyId} --> ${currentId}`); // loop back
-
-    return currentId;
-  }
-
-  case "ExpressionStatement": {
-    currentId = createNode(code.slice(...node.range));
-    if (parentId) edges.push(`${parentId} --> ${currentId}`);
-    return currentId;
-  }
-
-  case "ReturnStatement": {
-    currentId = createNode(
-      `return ${node.argument ? code.slice(...node.argument.range) : ""}`
-    );
-    if (parentId) edges.push(`${parentId} --> ${currentId}`);
-    return currentId;
-  }
-
-  default:
-    return null;
-}
-
+          return currentId;
+        }
+        case "ExpressionStatement": {
+          currentId = createNode(code.slice(...node.range));
+          if (parentId) edges.push(`${parentId} --> ${currentId}`);
+          return currentId;
+        }
+        case "ReturnStatement": {
+          currentId = createNode(
+            `return ${node.argument ? code.slice(...node.argument.range) : ""}`
+          );
+          if (parentId) edges.push(`${parentId} --> ${currentId}`);
+          return currentId;
+        }
+        default:
+          return null;
+      }
     }
 
     traverse(ast);
@@ -192,12 +183,15 @@ function generateFlowchart(code) {
     flowchart += [...new Set(edges)].join("\n");
 
     flowchartDiv.innerHTML = `<div class="mermaid">${flowchart}</div>`;
-    if (window.mermaid) {
+
+    // Mermaid v10+ rendering
+    if (window.mermaid && window.mermaid.run) {
       setTimeout(() => {
-        const mermaidDiv = flowchartDiv.querySelector(".mermaid");
-        if (mermaidDiv) {
-          mermaid.init(undefined, mermaidDiv);
-        }
+        window.mermaid.run({ nodes: [flowchartDiv.querySelector(".mermaid")] });
+      }, 0);
+    } else if (window.mermaid && window.mermaid.init) {
+      setTimeout(() => {
+        window.mermaid.init(undefined, flowchartDiv.querySelectorAll(".mermaid"));
       }, 0);
     }
   } catch (err) {
@@ -296,4 +290,90 @@ setTheme(savedTheme === "dark" || (savedTheme === null && prefersDark));
 // Toggle on button click
 themeToggle.addEventListener("click", () => {
   setTheme(!document.body.classList.contains("dark"));
+});
+
+// --- Lessons Section Logic ---
+const lessons = {
+  variables: {
+    title: "Variables",
+    description: `Variables store data values. In JavaScript, use <code>let</code> or <code>const</code> to declare variables.`,
+    example: `let name = "Alice";
+let age = 25;
+console.log("Name:", name);
+console.log("Age:", age);`
+  },
+  loops: {
+    title: "Loops",
+    description: `Loops let you repeat code. The <code>for</code> loop is common for counting.`,
+    example: `for (let i = 1; i <= 5; i++) {
+  console.log("Count:", i);
+}`
+  },
+  functions: {
+    title: "Functions",
+    description: `Functions group code to run it multiple times. Use <code>function</code> to define one.`,
+    example: `function greet(name) {
+  console.log("Hello, " + name + "!");
+}
+greet("Alice");
+greet("Bob");`
+  },
+  conditionals: {
+    title: "Conditionals",
+    description: `Conditionals let you run code only if something is true. Use <code>if</code> and <code>else</code>.`,
+    example: `let score = 85;
+if (score >= 60) {
+  console.log("Passed!");
+} else {
+  console.log("Try again!");
+}`
+  }
+};
+
+const lessonsLink = document.getElementById("lessonsLink");
+const lessonsSection = document.getElementById("lessonsSection");
+const container = document.getElementById("container");
+const lessonContent = document.getElementById("lessonContent");
+const backToEditor = document.getElementById("backToEditor");
+
+if (lessonsLink) {
+  lessonsLink.addEventListener("click", (e) => {
+    e.preventDefault();
+    container.style.display = "none";
+    lessonsSection.style.display = "block";
+    lessonContent.innerHTML = "<p>Select a topic to begin.</p>";
+  });
+}
+
+if (backToEditor) {
+  backToEditor.addEventListener("click", () => {
+    lessonsSection.style.display = "none";
+    container.style.display = "";
+  });
+}
+
+document.querySelectorAll(".lesson-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const lesson = lessons[btn.dataset.lesson];
+    if (lesson) {
+      lessonContent.innerHTML = `
+        <h3>${lesson.title}</h3>
+        <p>${lesson.description}</p>
+        <pre style="background:#222;color:#fff;padding:10px;border-radius:6px;"><code>${lesson.example}</code></pre>
+        <button class="nav-link" id="tryLessonCode" style="margin-top:1em;">Try in Editor</button>
+      `;
+      // Add event for "Try in Editor"
+      setTimeout(() => {
+        const tryBtn = document.getElementById("tryLessonCode");
+        if (tryBtn) {
+          tryBtn.onclick = () => {
+            lessonsSection.style.display = "none";
+            container.style.display = "";
+            editor.setValue(lesson.example);
+            editor.focus();
+          };
+        }
+      }, 0);
+    }
+  });
 });
